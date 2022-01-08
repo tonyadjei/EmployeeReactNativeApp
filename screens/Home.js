@@ -1,50 +1,27 @@
-import React from 'react';
-import { StyleSheet, Text, View, Image, FlatList } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { StyleSheet, Text, View, Image, FlatList, Alert } from 'react-native';
 import { Card, FAB } from 'react-native-paper';
 
 const Home = ({ navigation }) => {
-  const data = [
-    {
-      id: '1',
-      name: 'Anthony T. Adjei',
-      email: 'tonyteyeadjei@gmail.com',
-      salary: '$4000',
-      phone: '0758410782',
-      position: 'Front-end Engineer',
-      picture:
-        'https://images.unsplash.com/photo-1610216705422-caa3fcb6d158?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=880&q=80',
-    },
-    {
-      id: '2',
-      name: 'Morkesh Guno',
-      email: 'morkesh@gmail.com',
-      salary: '$3000',
-      phone: '0758410782',
-      position: 'Cloud Technician',
-      picture:
-        'https://images.unsplash.com/photo-1610216705422-caa3fcb6d158?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=880&q=80',
-    },
-    {
-      id: '3',
-      name: 'Alexandra Vitovich',
-      email: 'alexvitovich@gmail.com',
-      salary: '$6500',
-      phone: '0758410782',
-      position: 'App Developer',
-      picture:
-        'https://images.unsplash.com/photo-1610216705422-caa3fcb6d158?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=880&q=80',
-    },
-    {
-      id: '4',
-      name: 'Yaw Berko',
-      email: 'yawberko@gmail.com',
-      salary: '$7000',
-      phone: '0758410782',
-      position: 'DevOps Lead',
-      picture:
-        'https://images.unsplash.com/photo-1610216705422-caa3fcb6d158?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=880&q=80',
-    },
-  ];
+  const [data, setData] = useState({});
+  const [loading, setLoading] = useState(true);
+
+  const fetchData = async () => {
+    try {
+      const result = await fetch('http://ecd9-46-193-64-19.ngrok.io/employees');
+      const finalResult = await result.json();
+      setData(finalResult);
+      setLoading(false);
+    } catch (error) {
+      Alert.alert(error.message);
+    }
+  };
+
+  useEffect(async () => {
+    fetchData();
+  }, []);
+
+  // function to render each employee for Flatlist
   const renderCards = (item) => {
     return (
       <Card
@@ -55,7 +32,7 @@ const Home = ({ navigation }) => {
           <Image
             style={{ width: 60, height: 60, borderRadius: 30 }}
             source={{
-              uri: 'https://images.unsplash.com/photo-1610216705422-caa3fcb6d158?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=880&q=80',
+              uri: item.picture,
             }}
           />
           <View style={{ marginLeft: 10 }}>
@@ -69,12 +46,15 @@ const Home = ({ navigation }) => {
   return (
     <View style={{ flex: 1 }}>
       <FlatList
-        data={data}
+        data={data.data}
         renderItem={({ item }) => {
           return renderCards(item);
         }}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item._id}
+        onRefresh={() => fetchData()}
+        refreshing={loading}
       />
+
       <FAB
         style={styles.fab}
         icon="plus"
